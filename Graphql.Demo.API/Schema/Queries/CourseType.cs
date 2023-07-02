@@ -1,5 +1,6 @@
 ﻿using System;
-namespace Graphql.Demo.API.Schema
+
+namespace Graphql.Demo.API.Schema.Queries
 {
     public class CourseType
     {
