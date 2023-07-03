@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Graphql.Demo.API.Models;
+using System;
 
 namespace Graphql.Demo.API.Schema.Queries
 {
@@ -12,12 +13,5 @@ namespace Graphql.Demo.API.Schema.Queries
         public IEnumerable<StudentType> Students { get; set; }
 
         public string GetDescription() => $"{Name} is the Course Name.";
-    }
-
-    public enum Subject
-    {
-        Mathematics,
-        Science,
-        History
     }
 }
