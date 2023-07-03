@@ -10,10 +10,12 @@ namespace Graphql.Demo.API.Schema.Subscriptions
         //[Topic("courseCreated")]
         public CourseResult CourseCreated([EventMessage]CourseResult course) => course;
 
-        [SubscribeAndResolve]
-        public ValueTask<ISourceStream<CourseResult>> CourseUpdated(Guid courseId, [Service] ITopicEventReceiver topicEventReceiver)
+        [Subscribe(With = nameof(SubscribeCourseUpdated))]
+        public CourseResult CourseUpdated([EventMessage] CourseResult book) => book;
+
+        public ValueTask<ISourceStream<CourseResult>> SubscribeCourseUpdated(Guid courseId, [Service] ITopicEventReceiver topicEventReceiver) 
         {
-            var topicName = $"{courseId}_{nameof(Subscription.CourseUpdated)}";
+            var topicName = $"{courseId}_{nameof(CourseUpdated)}";
             return topicEventReceiver.SubscribeAsync<CourseResult>(topicName);
         }
     }
