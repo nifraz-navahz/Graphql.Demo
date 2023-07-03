@@ -24,4 +24,11 @@ app.UseEndpoints(endpoints =>
     endpoints.MapGraphQL();
 });
 
+using (var scope = app.Services.CreateScope())
+{
+    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<SchoolDbContext>>();
+    using var context = contextFactory.CreateDbContext();
+    context.Database.Migrate();
+}
+
 app.Run();
