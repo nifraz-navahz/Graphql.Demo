@@ -1,4 +1,6 @@
 ﻿using Graphql.Demo.API.Schema.Enums;
+using Graphql.Demo.API.Schema.Subscriptions;
+using HotChocolate.Subscriptions;
 using System;
 
 namespace Graphql.Demo.API.Schema.Mutations
@@ -10,7 +12,7 @@ namespace Graphql.Demo.API.Schema.Mutations
         {
             _courses = new List<CourseResult>();
         }
-        public CourseResult CreateCourse(CourseInputType courseInputType)
+        public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
             var newCourse = new CourseResult
             {
@@ -21,10 +23,12 @@ namespace Graphql.Demo.API.Schema.Mutations
             };
             _courses.Add(newCourse);
 
+            await topicEventSender.SendAsync(nameof(Subscription.CourseCreated), newCourse);
+
             return newCourse;
         }
 
-        public CourseResult UpdateCourse(Guid courseId, CourseInputType courseInputType)
+        public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
             var existingCourse = _courses.FirstOrDefault(x => x.Id == courseId);
             if (existingCourse == null)
@@ -35,6 +39,10 @@ namespace Graphql.Demo.API.Schema.Mutations
             existingCourse.Name = courseInputType.Name;
             existingCourse.Subject = courseInputType.Subject;
             existingCourse.InstructorId = courseInputType.InstructorId;
+
+            var topicName = $"{courseId}_{nameof(Subscription.CourseUpdated)}";
+            await topicEventSender.SendAsync(topicName, existingCourse);
+
             return existingCourse;
         }
 
