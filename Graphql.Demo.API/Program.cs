@@ -14,6 +14,7 @@ builder.Services.AddGraphQLServer()
 
 var connectionString = builder.Configuration.GetConnectionString("sqlite");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(x => x.UseSqlite(connectionString));
+builder.Services.AddScoped<CourseRepository>();
 
 var app = builder.Build();
 
