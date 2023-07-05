@@ -23,36 +23,21 @@ namespace Graphql.Demo.API.Schema.Queries
                 Id = x.Id,
                 Name = x.Name,
                 Subject = x.Subject,
-                Instructor = new InstructorType
-                {
-                    Id = x.Instructor.Id,
-                    FirstName = x.Instructor.FirstName,
-                    LastName = x.Instructor.LastName,
-                    Salary = x.Instructor.Salary,
-                }
+                InstructorId = x.InstructorId,
             });
         }
 
         public async Task<CourseType?> GetCourseByIdAsync(Guid id)
         {
             var course = await _courseRepository.GetById(id);
-            if (course == null)
-            {
-                return null;
-            }
+            if (course == null) { return null; }
 
             return new CourseType
             {
                 Id = course.Id,
                 Name = course.Name,
                 Subject = course.Subject,
-                Instructor = new InstructorType
-                {
-                    Id = course.Instructor.Id,
-                    FirstName = course.Instructor.FirstName,
-                    LastName = course.Instructor.LastName,
-                    Salary = course.Instructor.Salary,
-                }
+                InstructorId = course.InstructorId,
             };
         }
     }

@@ -4,6 +4,9 @@
     {
         Mathematics,
         Science,
-        History
+        History,
+        IT,
+        Language,
+        Religion,
     }
 }

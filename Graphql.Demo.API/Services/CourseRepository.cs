@@ -17,8 +17,6 @@ namespace Graphql.Demo.API.Services
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Courses
-                .Include(x => x.Instructor)
-                .Include(x => x.Students)
                 .ToListAsync();
         }
 
@@ -26,8 +24,6 @@ namespace Graphql.Demo.API.Services
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Courses
-                .Include(x => x.Instructor)
-                .Include(x => x.Students)
                 .SingleOrDefaultAsync(x => x.Id == id);
         }
 
