@@ -1,5 +1,6 @@
 ﻿using Graphql.Demo.API.Models;
 using Graphql.Demo.API.Schema.Filters;
+using Graphql.Demo.API.Schema.Sorters;
 using Graphql.Demo.API.Services;
 using System;
 namespace Graphql.Demo.API.Schema.Queries
@@ -43,10 +44,10 @@ namespace Graphql.Demo.API.Schema.Queries
 
         [UseOffsetPaging(IncludeTotalCount = true, DefaultPageSize = 10)]
         [UseFiltering(typeof(CourseFilterType))]
+        [UseSorting(typeof(CourseSortType))]
         public IQueryable<CourseType> GetCoursesOffsetPaged([Service(ServiceKind.Synchronized)] SchoolDbContext context)
         {
             return context.Courses
-                .OrderBy(x => x.Id)
                 .Select(x => new CourseType
                     {
                         Id = x.Id,
