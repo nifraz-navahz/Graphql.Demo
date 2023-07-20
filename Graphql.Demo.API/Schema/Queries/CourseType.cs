@@ -11,6 +11,7 @@ namespace Graphql.Demo.API.Schema.Queries
         public string? Name { get; set; }
         public Subject Subject { get; set; }
         //[GraphQLIgnore]
+        [IsProjected(true)]
         public Guid InstructorId { get; set; }
         //[GraphQLNonNullType]
         public async Task<InstructorType?> Instructor([Service] InstructorDataLoader instructorDataLoader)

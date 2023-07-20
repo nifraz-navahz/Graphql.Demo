@@ -43,6 +43,7 @@ namespace Graphql.Demo.API.Schema.Queries
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
         [UseSorting(typeof(CourseSortType))]
         public IQueryable<CourseType> GetCoursesOffsetPaged([Service(ServiceKind.Synchronized)] SchoolDbContext context)
