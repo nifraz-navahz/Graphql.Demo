@@ -15,7 +15,8 @@
       "launchUrl": "graphql",
       "applicationUrl": "https://localhost:7248;http://localhost:5179",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GOOGLE_APPLICATION_CREDENTIALS": "./firebase-config.json"
       }
     },
     "IIS Express": {

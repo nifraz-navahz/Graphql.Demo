@@ -1,9 +1,12 @@
-﻿using Graphql.Demo.API.Entities;
+﻿using FirebaseAdminAuthentication.DependencyInjection.Models;
+using Graphql.Demo.API.Entities;
 using Graphql.Demo.API.Schema.Enums;
 using Graphql.Demo.API.Schema.Subscriptions;
 using Graphql.Demo.API.Services;
+using HotChocolate.Authorization;
 using HotChocolate.Subscriptions;
 using System;
+using System.Security.Claims;
 
 namespace Graphql.Demo.API.Schema.Mutations
 {
@@ -16,8 +19,14 @@ namespace Graphql.Demo.API.Schema.Mutations
             _courseRepository = courseRepository;
         }
 
-        public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
+        [Authorize]
+        public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
+            var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
+            var email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
+            var username = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
+            var emailVerified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
+
             var newCourse = new Course
             {
                 //Id = Guid.NewGuid(),
@@ -39,6 +48,7 @@ namespace Graphql.Demo.API.Schema.Mutations
             return courseResult;
         }
 
+        [Authorize]
         public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
             var updatedCourse = new Course
@@ -64,6 +74,7 @@ namespace Graphql.Demo.API.Schema.Mutations
             return courseResult;
         }
 
+        [Authorize]
         public async Task<bool> DeleteCourse(Guid courseId)
         {
             try

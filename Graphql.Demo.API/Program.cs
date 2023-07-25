@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 using Graphql.Demo.API.Schema.Mutations;
 using Graphql.Demo.API.Schema.Queries;
 using Graphql.Demo.API.Schema.Subscriptions;
@@ -14,7 +16,11 @@ builder.Services.AddGraphQLServer()
     .AddInMemorySubscriptions()
     .AddProjections()
     .AddFiltering()
-    .AddSorting();
+    .AddSorting()
+    .AddAuthorization();
+
+builder.Services.AddSingleton(FirebaseApp.Create());
+builder.Services.AddFirebaseAuthentication();
 
 var connectionString = builder.Configuration.GetConnectionString("sqlite");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(x => x.UseSqlite(connectionString));
@@ -27,6 +33,7 @@ builder.Services.AddScoped<InstructorDataLoader>();
 var app = builder.Build();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseWebSockets();
 app.UseEndpoints(endpoints =>
 {
