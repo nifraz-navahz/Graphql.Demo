@@ -31,6 +31,7 @@ builder.Services.AddDbContext<SchoolDbContext>();
 builder.Services.AddScoped<CourseRepository>();
 builder.Services.AddScoped<InstructorRepository>();
 builder.Services.AddScoped<InstructorDataLoader>();
+builder.Services.AddScoped<UserDataLoader>();
 
 var app = builder.Build();
 

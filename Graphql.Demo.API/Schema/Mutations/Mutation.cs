@@ -43,7 +43,7 @@ namespace Graphql.Demo.API.Schema.Mutations
                 Name = course.Name,
                 Subject = course.Subject,
                 InstructorId = course.InstructorId,
-                CreatorId = course.CreatorId
+                //CreatorId = course.CreatorId
             };
 
             await topicEventSender.SendAsync(nameof(Subscription.CourseCreated), courseResult);
@@ -79,7 +79,7 @@ namespace Graphql.Demo.API.Schema.Mutations
                 Name = updatedCourse.Name,
                 Subject = updatedCourse.Subject,
                 InstructorId = updatedCourse.InstructorId,
-                CreatorId = updatedCourse.CreatorId
+                //CreatorId = updatedCourse.CreatorId
             };
 
             var topicName = $"{courseId}_{nameof(Subscription.CourseUpdated)}";

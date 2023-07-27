@@ -17,17 +17,17 @@ namespace Graphql.Demo.API.Schema.Queries
         [GraphQLDeprecated("This property is deprecated.")]
         public string Instructions => "Graphql query is working! :)";
 
-        public async Task<IEnumerable<CourseType>> GetCoursesAsync()
-        {
-            var courses = await _courseRepository.GetAll();
-            return courses.Select(x => new CourseType
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Subject = x.Subject,
-                InstructorId = x.InstructorId,
-            });
-        }
+        //public async Task<IEnumerable<CourseType>> GetCoursesAsync()
+        //{
+        //    var courses = await _courseRepository.GetAll();
+        //    return courses.Select(x => new CourseType
+        //    {
+        //        Id = x.Id,
+        //        Name = x.Name,
+        //        Subject = x.Subject,
+        //        InstructorId = x.InstructorId,
+        //    });
+        //}
 
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
         public async Task<IEnumerable<CourseType>> GetCoursesCursorPagedAsync()
@@ -39,6 +39,7 @@ namespace Graphql.Demo.API.Schema.Queries
                 Name = x.Name,
                 Subject = x.Subject,
                 InstructorId = x.InstructorId,
+                CreatorId = x.CreatorId
             });
         }
 
@@ -46,7 +47,7 @@ namespace Graphql.Demo.API.Schema.Queries
         [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
         [UseSorting(typeof(CourseSortType))]
-        public IQueryable<CourseType> GetCoursesOffsetPaged([Service(ServiceKind.Synchronized)] SchoolDbContext context)
+        public IQueryable<CourseType> GetCourses([Service(ServiceKind.Synchronized)] SchoolDbContext context)
         {
             return context.Courses
                 .Select(x => new CourseType
@@ -71,6 +72,7 @@ namespace Graphql.Demo.API.Schema.Queries
                 Name = course.Name,
                 Subject = course.Subject,
                 InstructorId = course.InstructorId,
+                CreatorId = course.CreatorId
             };
         }
     }

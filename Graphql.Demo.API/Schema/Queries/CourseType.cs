@@ -1,4 +1,5 @@
-﻿using Graphql.Demo.API.Models;
+﻿using FirebaseAdmin.Auth;
+using Graphql.Demo.API.Models;
 using Graphql.Demo.API.Services;
 using Graphql.Demo.API.Services.DataLoaders;
 using System;
@@ -28,7 +29,13 @@ namespace Graphql.Demo.API.Schema.Queries
             };
         }
         public IEnumerable<StudentType>? Students { get; set; }
+        [IsProjected(true)]
         public string CreatorId { get; set; }
+        public async Task<UserType?> Creator([Service] UserDataLoader userDataLoader)
+        {
+            if (string.IsNullOrWhiteSpace(CreatorId)) { return null; }
+            return await userDataLoader.LoadAsync(CreatorId);
+        }
         public string GetDescription() => $"{Name} is the Course Name.";
     }
 }
