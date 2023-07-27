@@ -2,6 +2,7 @@
 {
     public enum AppErrorCodes
     {
-        COURSE_NOT_FOUND
+        NOT_FOUND,
+        NOT_AUTHORIZED
     }
 }

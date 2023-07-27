@@ -55,6 +55,7 @@ namespace Graphql.Demo.API.Schema.Queries
                         Name = x.Name,
                         Subject = x.Subject,
                         InstructorId = x.InstructorId,
+                        CreatorId = x.CreatorId
                     }
                 );
         }

@@ -1,5 +1,6 @@
 using FirebaseAdmin;
 using FirebaseAdminAuthentication.DependencyInjection.Extensions;
+using FirebaseAdminAuthentication.DependencyInjection.Models;
 using Graphql.Demo.API.Schema.Mutations;
 using Graphql.Demo.API.Schema.Queries;
 using Graphql.Demo.API.Schema.Subscriptions;
@@ -21,6 +22,7 @@ builder.Services.AddGraphQLServer()
 
 builder.Services.AddSingleton(FirebaseApp.Create());
 builder.Services.AddFirebaseAuthentication();
+builder.Services.AddAuthorization(o => o.AddPolicy("isAdmin", c => c.RequireClaim(FirebaseUserClaimType.EMAIL, "nifraz@live.com")));
 
 var connectionString = builder.Configuration.GetConnectionString("sqlite");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(x => x.UseSqlite(connectionString));

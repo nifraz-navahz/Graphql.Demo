@@ -28,7 +28,7 @@ namespace Graphql.Demo.API.Schema.Queries
             };
         }
         public IEnumerable<StudentType>? Students { get; set; }
-
+        public string CreatorId { get; set; }
         public string GetDescription() => $"{Name} is the Course Name.";
     }
 }

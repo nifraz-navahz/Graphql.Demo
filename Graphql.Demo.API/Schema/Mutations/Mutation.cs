@@ -5,6 +5,7 @@ using Graphql.Demo.API.Schema.Subscriptions;
 using Graphql.Demo.API.Services;
 using HotChocolate.Authorization;
 using HotChocolate.Subscriptions;
+using Microsoft.AspNetCore.Connections.Features;
 using System;
 using System.Security.Claims;
 
@@ -23,9 +24,9 @@ namespace Graphql.Demo.API.Schema.Mutations
         public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
             var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
-            var email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
-            var username = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
-            var emailVerified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
+            //var email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
+            //var username = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
+            //var emailVerified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
 
             var newCourse = new Course
             {
@@ -33,6 +34,7 @@ namespace Graphql.Demo.API.Schema.Mutations
                 Name = courseInputType.Name,
                 Subject = courseInputType.Subject,
                 InstructorId = courseInputType.InstructorId,
+                CreatorId = userId
             };
             var course = await _courseRepository.Create(newCourse);
             var courseResult = new CourseResult
@@ -41,6 +43,7 @@ namespace Graphql.Demo.API.Schema.Mutations
                 Name = course.Name,
                 Subject = course.Subject,
                 InstructorId = course.InstructorId,
+                CreatorId = course.CreatorId
             };
 
             await topicEventSender.SendAsync(nameof(Subscription.CourseCreated), courseResult);
@@ -49,24 +52,35 @@ namespace Graphql.Demo.API.Schema.Mutations
         }
 
         [Authorize]
-        public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
+        public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
-            var updatedCourse = new Course
+            var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
+
+            var existingCourse = await _courseRepository.GetById(courseId);
+
+            if (existingCourse == null)
             {
-                Id = courseId,
-                Name = courseInputType.Name,
-                Subject = courseInputType.Subject,
-                InstructorId = courseInputType.InstructorId,
-            };
-            var course = await _courseRepository.Update(updatedCourse);
+                throw new GraphQLException(new Error("Course not found!", AppErrorCodes.NOT_FOUND.ToString()));
+            }
+
+            if (existingCourse.CreatorId != userId)
+            {
+                throw new GraphQLException(new Error("Update permission denied for the user!", AppErrorCodes.NOT_AUTHORIZED.ToString()));
+            }
+
+            existingCourse.Name = courseInputType.Name;
+            existingCourse.Subject = courseInputType.Subject;
+            existingCourse.InstructorId = courseInputType.InstructorId;
+
+            var updatedCourse = await _courseRepository.Update(existingCourse);
             var courseResult = new CourseResult
             {
-                Id = course.Id,
-                Name = course.Name,
-                Subject = course.Subject,
-                InstructorId = course.InstructorId,
+                Id = updatedCourse.Id,
+                Name = updatedCourse.Name,
+                Subject = updatedCourse.Subject,
+                InstructorId = updatedCourse.InstructorId,
+                CreatorId = updatedCourse.CreatorId
             };
-
 
             var topicName = $"{courseId}_{nameof(Subscription.CourseUpdated)}";
             await topicEventSender.SendAsync(topicName, courseResult);
@@ -74,7 +88,7 @@ namespace Graphql.Demo.API.Schema.Mutations
             return courseResult;
         }
 
-        [Authorize]
+        [Authorize(Policy = "isAdmin")]
         public async Task<bool> DeleteCourse(Guid courseId)
         {
             try
