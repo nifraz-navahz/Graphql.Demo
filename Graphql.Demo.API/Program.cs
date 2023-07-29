@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGraphQLServer()
     .AddQueryType<Query>()
+    .AddTypeExtension<CoursesQuery>()
     .AddMutationType<Mutation>()
     .AddSubscriptionType<Subscription>()
     .AddType<CourseType>()
