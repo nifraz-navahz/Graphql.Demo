@@ -6,7 +6,7 @@ using System;
 
 namespace Graphql.Demo.API.Schema.Queries
 {
-    public class CourseType
+    public class CourseType : ISearchType
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }

@@ -2,6 +2,7 @@
 using Graphql.Demo.API.Schema.Filters;
 using Graphql.Demo.API.Schema.Sorters;
 using Graphql.Demo.API.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 namespace Graphql.Demo.API.Schema.Queries
 {
@@ -59,6 +60,37 @@ namespace Graphql.Demo.API.Schema.Queries
                         CreatorId = x.CreatorId
                     }
                 );
+        }
+
+        public async Task<IEnumerable<ISearchType>> SearchAsync([Service(ServiceKind.Synchronized)] SchoolDbContext context, string term)
+        {
+            var courses = await context.Courses
+                .Where(x => x.Name.ToLower().Contains(term.ToLower()))
+                .Select(x => new CourseType
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Subject = x.Subject,
+                        InstructorId = x.InstructorId,
+                        CreatorId = x.CreatorId
+                    }
+                )
+                .ToListAsync();
+            var instructors = await context.Instructors
+                .Where(x => x.FirstName.ToLower().Contains(term.ToLower()) || x.LastName.ToLower().Contains(term.ToLower()))
+                .Select(x => new InstructorType
+                    {
+                        Id = x.Id,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        Salary = x.Salary
+                    }
+                )
+                .ToListAsync();
+
+            return new List<ISearchType>()
+                .Concat(courses)
+                .Concat(instructors);
         }
 
         public async Task<CourseType?> GetCourseByIdAsync(Guid id)
