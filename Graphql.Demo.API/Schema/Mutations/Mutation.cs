@@ -2,6 +2,7 @@
 using Graphql.Demo.API.Entities;
 using Graphql.Demo.API.Schema.Enums;
 using Graphql.Demo.API.Schema.Subscriptions;
+using Graphql.Demo.API.Schema.Validators;
 using Graphql.Demo.API.Services;
 using HotChocolate.Authorization;
 using HotChocolate.Subscriptions;
@@ -14,15 +15,19 @@ namespace Graphql.Demo.API.Schema.Mutations
     public class Mutation
     {
         private readonly CourseRepository _courseRepository;
+        private readonly CourseInputValidator _courseInputValidator;
 
-        public Mutation(CourseRepository courseRepository)
+        public Mutation(CourseRepository courseRepository, CourseInputValidator courseInputValidator)
         {
             _courseRepository = courseRepository;
+            _courseInputValidator = courseInputValidator;
         }
 
-        [Authorize]
+        //[Authorize]
         public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
+            Validate(courseInputType);
+
             var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
             //var email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
             //var username = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
@@ -51,9 +56,24 @@ namespace Graphql.Demo.API.Schema.Mutations
             return courseResult;
         }
 
+        private void Validate(CourseInputType courseInputType)
+        {
+            var result = _courseInputValidator.Validate(courseInputType);
+            if (!result.IsValid)
+            {
+                var errorsString = result.Errors
+                    .Select(x => $"Code: {x.ErrorCode}, Message: {x.ErrorMessage}")
+                    .Aggregate((x1, x2) => $"{x1}; {x2}");
+
+                throw new GraphQLException(errorsString);
+            }
+        }
+
         [Authorize]
         public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
+            Validate(courseInputType);
+
             var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
 
             var existingCourse = await _courseRepository.GetById(courseId);

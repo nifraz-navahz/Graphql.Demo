@@ -11,7 +11,7 @@ namespace Graphql.Demo.API.Entities
         public Guid InstructorId { get; set; }
         public Instructor Instructor { get; set; }
         public IEnumerable<Student> Students { get; set; }
-        public string CreatorId { get; set; }
+        public string? CreatorId { get; set; }
         public string GetDescription() => $"{Name} is the Course Name.";
     }
 }

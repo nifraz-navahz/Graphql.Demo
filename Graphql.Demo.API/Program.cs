@@ -1,14 +1,19 @@
 using FirebaseAdmin;
 using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 using FirebaseAdminAuthentication.DependencyInjection.Models;
+using FluentValidation.AspNetCore;
 using Graphql.Demo.API.Schema.Mutations;
 using Graphql.Demo.API.Schema.Queries;
 using Graphql.Demo.API.Schema.Subscriptions;
+using Graphql.Demo.API.Schema.Validators;
 using Graphql.Demo.API.Services;
 using Graphql.Demo.API.Services.DataLoaders;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddGraphQLServer()
     .AddQueryType<Query>()
@@ -23,6 +28,7 @@ builder.Services.AddGraphQLServer()
     .AddSorting()
     .AddAuthorization();
 
+builder.Services.AddScoped<CourseInputValidator>();
 builder.Services.AddSingleton(FirebaseApp.Create());
 builder.Services.AddFirebaseAuthentication();
 builder.Services.AddAuthorization(o => o.AddPolicy("isAdmin", c => c.RequireClaim(FirebaseUserClaimType.EMAIL, "nifraz@live.com")));
