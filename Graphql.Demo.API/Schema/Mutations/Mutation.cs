@@ -1,5 +1,7 @@
 ﻿using FirebaseAdminAuthentication.DependencyInjection.Models;
 using Graphql.Demo.API.Entities;
+using Graphql.Demo.API.Middlewares.UseUser;
+using Graphql.Demo.API.Models;
 using Graphql.Demo.API.Schema.Enums;
 using Graphql.Demo.API.Schema.Subscriptions;
 using Graphql.Demo.API.Schema.Validators;
@@ -23,15 +25,11 @@ namespace Graphql.Demo.API.Schema.Mutations
             _courseInputValidator = courseInputValidator;
         }
 
-        //[Authorize]
-        public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
+        [Authorize]
+        [UseUser]
+        public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, [AuthUser] User user)
         {
             Validate(courseInputType);
-
-            var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
-            //var email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
-            //var username = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
-            //var emailVerified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
 
             var newCourse = new Course
             {
@@ -39,7 +37,7 @@ namespace Graphql.Demo.API.Schema.Mutations
                 Name = courseInputType.Name,
                 Subject = courseInputType.Subject,
                 InstructorId = courseInputType.InstructorId,
-                CreatorId = userId
+                CreatorId = user.Id
             };
             var course = await _courseRepository.Create(newCourse);
             var courseResult = new CourseResult
@@ -70,11 +68,10 @@ namespace Graphql.Demo.API.Schema.Mutations
         }
 
         [Authorize]
-        public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
+        [UseUser]
+        public async Task<CourseResult> UpdateCourse(Guid courseId, CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender, [AuthUser] User user)
         {
             Validate(courseInputType);
-
-            var userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
 
             var existingCourse = await _courseRepository.GetById(courseId);
 
@@ -83,7 +80,7 @@ namespace Graphql.Demo.API.Schema.Mutations
                 throw new GraphQLException(new Error("Course not found!", AppErrorCodes.NOT_FOUND.ToString()));
             }
 
-            if (existingCourse.CreatorId != userId)
+            if (existingCourse.CreatorId != user.Id)
             {
                 throw new GraphQLException(new Error("Update permission denied for the user!", AppErrorCodes.NOT_AUTHORIZED.ToString()));
             }
