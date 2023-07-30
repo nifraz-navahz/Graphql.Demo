@@ -16,6 +16,7 @@ builder.Services.AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddGraphQLServer()
+    //.RegisterDbContext<SchoolDbContext>()
     .AddQueryType<Query>()
     .AddTypeExtension<CoursesQuery>()
     .AddMutationType<Mutation>()
@@ -34,9 +35,13 @@ builder.Services.AddFirebaseAuthentication();
 builder.Services.AddAuthorization(o => o.AddPolicy("isAdmin", c => c.RequireClaim(FirebaseUserClaimType.EMAIL, "nifraz@live.com")));
 
 var connectionString = builder.Configuration.GetConnectionString("sqlite");
-builder.Services.AddPooledDbContextFactory<SchoolDbContext>(x => x.UseSqlite(connectionString));
 
-builder.Services.AddDbContext<SchoolDbContext>();
+builder.Services.AddPooledDbContextFactory<SchoolDbContext>(x => x.UseSqlite(connectionString)
+    .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine)
+    .EnableSensitiveDataLogging() //parameter values are visible. use only in development
+);
+builder.Services.AddDbContext<SchoolDbContext>(x => x.UseSqlite(connectionString));
+
 builder.Services.AddScoped<CourseRepository>();
 builder.Services.AddScoped<InstructorRepository>();
 builder.Services.AddScoped<InstructorDataLoader>();

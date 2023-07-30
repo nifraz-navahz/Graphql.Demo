@@ -19,12 +19,13 @@ namespace Graphql.Demo.API.Schema.Queries
         //{
         //    var courses = await _courseRepository.GetAll();
         //    return courses.Select(x => new CourseType
-        //    {
-        //        Id = x.Id,
-        //        Name = x.Name,
-        //        Subject = x.Subject,
-        //        InstructorId = x.InstructorId,
-        //    });
+        //        {
+        //            Id = x.Id,
+        //            Name = x.Name,
+        //            Subject = x.Subject,
+        //            InstructorId = x.InstructorId,
+        //        }
+        //    );
         //}
 
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
@@ -32,20 +33,21 @@ namespace Graphql.Demo.API.Schema.Queries
         {
             var courses = await _courseRepository.GetAll();
             return courses.Select(x => new CourseType
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Subject = x.Subject,
-                InstructorId = x.InstructorId,
-                CreatorId = x.CreatorId
-            });
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Subject = x.Subject,
+                    InstructorId = x.InstructorId,
+                    CreatorId = x.CreatorId
+                }
+            );
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, DefaultPageSize = 10)]
         [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
         [UseSorting(typeof(CourseSortType))]
-        public IQueryable<CourseType> GetCourses([Service(ServiceKind.Synchronized)] SchoolDbContext context)
+        public IQueryable<CourseType> GetCourses([Service(ServiceKind.Resolver)] SchoolDbContext context) //ServiceKind.Resolver needs thorough testing with multiple resolvers in parallel
         {
             return context.Courses
                 .Select(x => new CourseType
@@ -56,32 +58,32 @@ namespace Graphql.Demo.API.Schema.Queries
                     InstructorId = x.InstructorId,
                     CreatorId = x.CreatorId
                 }
-                );
+            );
         }
 
-        public async Task<IEnumerable<ISearchType>> SearchAsync([Service(ServiceKind.Synchronized)] SchoolDbContext context, string term)
+        public async Task<IEnumerable<ISearchType>> SearchAsync([Service(ServiceKind.Resolver)] SchoolDbContext context, string term)
         {
             var courses = await context.Courses
                 .Where(x => x.Name.ToLower().Contains(term.ToLower()))
                 .Select(x => new CourseType
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Subject = x.Subject,
-                    InstructorId = x.InstructorId,
-                    CreatorId = x.CreatorId
-                }
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Subject = x.Subject,
+                        InstructorId = x.InstructorId,
+                        CreatorId = x.CreatorId
+                    }
                 )
                 .ToListAsync();
             var instructors = await context.Instructors
                 .Where(x => x.FirstName.ToLower().Contains(term.ToLower()) || x.LastName.ToLower().Contains(term.ToLower()))
                 .Select(x => new InstructorType
-                {
-                    Id = x.Id,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    Salary = x.Salary
-                }
+                    {
+                        Id = x.Id,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        Salary = x.Salary
+                    }
                 )
                 .ToListAsync();
 

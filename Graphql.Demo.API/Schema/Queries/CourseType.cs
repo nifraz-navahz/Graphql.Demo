@@ -30,7 +30,7 @@ namespace Graphql.Demo.API.Schema.Queries
         }
         public IEnumerable<StudentType>? Students { get; set; }
         [IsProjected(true)]
-        public string CreatorId { get; set; }
+        public string? CreatorId { get; set; }
         public async Task<UserType?> Creator([Service] UserDataLoader userDataLoader)
         {
             if (string.IsNullOrWhiteSpace(CreatorId)) { return null; }
